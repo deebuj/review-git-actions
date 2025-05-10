@@ -27,9 +27,9 @@ runs:
         repository: ${{ github.repository }}.wiki
         path: wiki
         token: ${{ inputs.token }}
-      shell: bash
     
     - name: Update deployment log
+      shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.token }}
       run: |
@@ -41,4 +41,3 @@ runs:
         git add Deployment-Log.md
         git commit -m "Log ${{ inputs.environment }} deployment #${{ inputs.run_number }}"
         git push
-      shell: bash
