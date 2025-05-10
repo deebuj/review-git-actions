@@ -1,0 +1,39 @@
+name: Delpoy Application
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Deploy version"
+        required: true
+        default: "v1.0.0"
+        type: string
+
+jobs: 
+  deploy-to-staging:
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+    
+      - name: Deploy to staging
+        run: |
+          echo "Deploying version ${{ github.event.inputs.version }} to staging"
+          # Add your deployment script here    
+
+  deploy-to-production:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+    
+      - name: Deploy to staging
+        run: |
+          echo "Deploying version ${{ github.event.inputs.version }} to production"
+          # Add your deployment script here
+  
+  
+
+    
