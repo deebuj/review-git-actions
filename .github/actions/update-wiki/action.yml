@@ -20,35 +20,29 @@ inputs:
 
 runs:
   using: "composite"
-  steps:
-    - name: Checkout wiki
+  steps:    
+  - name: Checkout wiki
       uses: actions/checkout@v4
-      with:
-        repository: ${{ github.repository }}.wiki
-        path: wiki
-        token: ${{ inputs.token }}
-      - name: Prepare script
-      shell: bash
-      run: |
-        echo "Making script executable..."
-        ls -la ${{ github.action_path }}
-        chmod +x ${{ github.action_path }}/update-wiki-log.sh
-    
-    - name: Update deployment log
-      shell: bash
-      env:
-        GITHUB_TOKEN: ${{ inputs.token }}
-      run: |
-        cd wiki
-        echo "Current directory: $(pwd)"
-        echo "Updating wiki for ${{ inputs.environment }} deployment..."
-        
-        # Set git configuration
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.wiki.git
-        
-        # Run the update script
-        ${{ github.action_path }}/update-wiki-log.sh "${{ inputs.environment }}" "${{ inputs.run_number }}" "${{ inputs.actor }}"
-        
-        echo "Wiki update completed."
+    with:
+      repository: ${{ github.repository }}.wiki
+      path: wiki
+      token: ${{ inputs.token }}
+  
+  - name: Run update script
+    shell: bash
+    env:
+      GITHUB_TOKEN: ${{ inputs.token }}
+    run: |
+      cd wiki
+      echo "Making script executable..."
+      chmod +x $GITHUB_ACTION_PATH/update-wiki-log.sh
+      echo "Current directory: $(pwd)"
+      echo "Updating wiki for ${{ inputs.environment }} deployment..."
+      
+      # Configure git
+      git config --local user.email "action@github.com"
+      git config --local user.name "GitHub Action"
+      git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.wiki.git
+      
+      # Execute update script
+      $GITHUB_ACTION_PATH/update-wiki-log.sh "${{ inputs.environment }}" "${{ inputs.run_number }}" "${{ inputs.actor }}"
