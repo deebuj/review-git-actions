@@ -27,7 +27,8 @@ runs:
         repository: ${{ github.repository }}.wiki
         path: wiki
         token: ${{ inputs.token }}
-      - name: Update deployment log
+    
+    - name: Update deployment log
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.token }}
