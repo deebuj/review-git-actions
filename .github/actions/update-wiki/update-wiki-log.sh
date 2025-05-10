@@ -41,12 +41,16 @@ if [ "$ENVIRONMENT" = "Staging" ]; then
   echo "Adding to Staging section..."
   # Create new content with entry after Staging table header
   awk -v entry="$NEW_ENTRY" '
-    /## Staging Deployments/,/## Production Deployments/ {
-      if (/\|------|------------|-------------\|/) {
-        print $0
+    BEGIN { in_staging = 0; done = 0 }
+    /## Staging Deployments/ { in_staging = 1 }
+    /## Production Deployments/ { in_staging = 0 }
+    /\|------|------------|-------------\|/ {
+      print $0
+      if (in_staging && !done) {
         print entry
-        next
+        done = 1
       }
+      next
     }
     { print }
   ' Deployment-Log.md > temp.md
@@ -54,12 +58,15 @@ else
   echo "Adding to Production section..."
   # Add entry after Production table header
   awk -v entry="$NEW_ENTRY" '
-    /## Production Deployments/,$ {
-      if (/\|------|------------|-------------\|/) {
-        print $0
+    BEGIN { in_production = 0; done = 0 }
+    /## Production Deployments/ { in_production = 1 }
+    /\|------|------------|-------------\|/ {
+      print $0
+      if (in_production && !done) {
         print entry
-        next
+        done = 1
       }
+      next
     }
     { print }
   ' Deployment-Log.md > temp.md
