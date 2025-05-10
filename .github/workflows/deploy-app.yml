@@ -31,6 +31,17 @@ jobs:
     runs-on: ubuntu-latest
     environment: staging
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Checkout wiki
+        uses: actions/checkout@v4
+        with:
+          repository: ${{github.repository}}.wiki
+          path: wiki
+      
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
@@ -46,13 +57,34 @@ jobs:
             exit 1
           fi
           echo "Deploying version ${{ github.event.inputs.version }} to staging"
-          # Add your deployment script here    
+          # Add your deployment script here
+      
+      - name: Update deployment log
+        run: |
+          cd wiki
+          echo "| $(date -u '+%Y-%m-%d %H:%M:%S UTC') | Staging | ${{ github.run_number }} | ${{ github.actor }} |" >> Deployment-Log.md
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add Deployment-Log.md
+          git commit -m "Log staging deployment #${{ github.run_number }}"
+          git push
 
   deploy-to-production:
     runs-on: ubuntu-latest
     environment: production
     needs: deploy-to-staging
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Checkout wiki
+        uses: actions/checkout@v4
+        with:
+          repository: ${{github.repository}}.wiki
+          path: wiki
+      
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
@@ -69,6 +101,16 @@ jobs:
           fi
           echo "Deploying version ${{ github.event.inputs.version }} to production"
           # Add your deployment script here
+      
+      - name: Update deployment log
+        run: |
+          cd wiki
+          echo "| $(date -u '+%Y-%m-%d %H:%M:%S UTC') | Production | ${{ github.run_number }} | ${{ github.actor }} |" >> Deployment-Log.md
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add Deployment-Log.md
+          git commit -m "Log production deployment #${{ github.run_number }}"
+          git push
 
 
 
