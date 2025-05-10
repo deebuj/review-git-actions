@@ -1,0 +1,44 @@
+name: 'Update Wiki Log'
+description: 'Updates the wiki with deployment information'
+
+inputs:
+  environment:
+    required: true
+    description: 'The environment being deployed to'
+  run_number:
+    required: true
+    description: 'The GitHub Actions run number'
+  actor:
+    required: true
+    description: 'The user who triggered the deployment'
+  version:
+    required: true
+    description: 'The version being deployed'
+  token:
+    required: true
+    description: 'GitHub token with wiki permissions'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout wiki
+      uses: actions/checkout@v4
+      with:
+        repository: ${{ github.repository }}.wiki
+        path: wiki
+        token: ${{ inputs.token }}
+      shell: bash
+    
+    - name: Update deployment log
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
+      run: |
+        cd wiki
+        echo "| $(date -u '+%Y-%m-%d %H:%M:%S UTC') | ${{ inputs.environment }} | ${{ inputs.run_number }} | ${{ inputs.actor }} |" >> Deployment-Log.md
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.wiki.git
+        git add Deployment-Log.md
+        git commit -m "Log ${{ inputs.environment }} deployment #${{ inputs.run_number }}"
+        git push
+      shell: bash

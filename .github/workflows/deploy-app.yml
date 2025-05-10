@@ -51,16 +51,14 @@ jobs:
           echo "Deploying version ${{ github.event.inputs.version }} to staging"
           # Add your deployment script here
 
-  log-staging-deployment:
-    needs: deploy-to-staging
-    uses: ./.github/workflows/update-wiki.yml
-    with:
-      environment: 'Staging'
-      run_number: ${{ github.run_number }}
-      actor: ${{ github.actor }}
-      version: ${{ github.event.inputs.version }}
-    secrets:
-      WIKI_TOKEN: ${{ secrets.WIKI_TOKEN }}
+      - name: Log staging deployment
+        uses: ./.github/actions/update-wiki
+        with:
+          environment: 'Staging'
+          run_number: ${{ github.run_number }}
+          actor: ${{ github.actor }}
+          version: ${{ github.event.inputs.version }}
+          token: ${{ secrets.WIKI_TOKEN }}
 
   deploy-to-production:
     runs-on: ubuntu-latest
@@ -87,16 +85,14 @@ jobs:
           echo "Deploying version ${{ github.event.inputs.version }} to production"
           # Add your deployment script here
 
-  log-production-deployment:
-    needs: deploy-to-production
-    uses: ./.github/workflows/update-wiki.yml
-    with:
-      environment: 'Production'
-      run_number: ${{ github.run_number }}
-      actor: ${{ github.actor }}
-      version: ${{ github.event.inputs.version }}
-    secrets:
-      WIKI_TOKEN: ${{ secrets.WIKI_TOKEN }}
+      - name: Log production deployment
+        uses: ./.github/actions/update-wiki
+        with:
+          environment: 'Production'
+          run_number: ${{ github.run_number }}
+          actor: ${{ github.actor }}
+          version: ${{ github.event.inputs.version }}
+          token: ${{ secrets.WIKI_TOKEN }}
 
 
 
