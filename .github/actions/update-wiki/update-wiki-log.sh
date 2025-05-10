@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -ex  # Add -x for verbose output
 
 # Parameters
 ENVIRONMENT="$1"
@@ -32,24 +32,35 @@ This page tracks all deployments made through our GitHub Actions workflow.
 EOL
 fi
 
-# Create a temporary file
-cp Deployment-Log.md temp.md
+# Create new entry
+NEW_ENTRY="| $(date -u '+%Y-%m-%d %H:%M:%S UTC') | ${RUN_NUMBER} | ${ACTOR} |"
+echo "New entry to add: ${NEW_ENTRY}"
 
 # Add new deployment to appropriate section
 if [ "$ENVIRONMENT" = "Staging" ]; then
-  # Find the Staging section and add entry after its header
-  awk '/## Staging Deployments/{p=NR+3}(NR==p){print "| '"$(date -u '+%Y-%m-%d %H:%M:%S UTC')"' | '"$RUN_NUMBER"' | '"$ACTOR"' |\n" $0;next}1' Deployment-Log.md > temp.md
+  echo "Adding to Staging section..."
+  sed -i "/## Staging Deployments/a ${NEW_ENTRY}" Deployment-Log.md
 else
-  # Find the Production section and add entry after its header
-  awk '/## Production Deployments/{p=NR+3}(NR==p){print "| '"$(date -u '+%Y-%m-%d %H:%M:%S UTC')"' | '"$RUN_NUMBER"' | '"$ACTOR"' |\n" $0;next}1' Deployment-Log.md > temp.md
+  echo "Adding to Production section..."
+  sed -i "/## Production Deployments/a ${NEW_ENTRY}" Deployment-Log.md
 fi
+
+# Display the updated content
+echo "Updated content:"
+cat Deployment-Log.md
 
 # Replace original file with updated content
 mv temp.md Deployment-Log.md
 
-# Configure git
+# Configure git and commit changes
+git status
+echo "Configuring git..."
 git config --local user.email "action@github.com"
 git config --local user.name "GitHub Action"
 git add Deployment-Log.md
+git status
+echo "Committing changes..."
 git commit -m "Log $ENVIRONMENT deployment #$RUN_NUMBER"
+echo "Pushing changes..."
 git push
+echo "Wiki update completed."
