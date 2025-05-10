@@ -27,17 +27,12 @@ runs:
         repository: ${{ github.repository }}.wiki
         path: wiki
         token: ${{ inputs.token }}
-    
-    - name: Update deployment log
+      - name: Update deployment log
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.token }}
       run: |
         cd wiki
-        echo "| $(date -u '+%Y-%m-%d %H:%M:%S UTC') | ${{ inputs.environment }} | ${{ inputs.run_number }} | ${{ inputs.actor }} |" >> Deployment-Log.md
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
+        chmod +x ../.github/actions/update-wiki/update-wiki-log.sh
         git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.wiki.git
-        git add Deployment-Log.md
-        git commit -m "Log ${{ inputs.environment }} deployment #${{ inputs.run_number }}"
-        git push
+        ../.github/actions/update-wiki/update-wiki-log.sh "${{ inputs.environment }}" "${{ inputs.run_number }}" "${{ inputs.actor }}"
