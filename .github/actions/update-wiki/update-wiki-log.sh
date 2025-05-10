@@ -39,26 +39,27 @@ echo "New entry to add: ${NEW_ENTRY}"
 # Add new deployment to appropriate section
 if [ "$ENVIRONMENT" = "Staging" ]; then
   echo "Adding to Staging section..."
-  # Create new content with entry after table header
+  # Create new content with entry after Staging table header
   awk -v entry="$NEW_ENTRY" '
-    /\|------|------------|-------------\|/ { 
-      print $0
-      print entry
-      next
+    /## Staging Deployments/,/## Production Deployments/ {
+      if (/\|------|------------|-------------\|/) {
+        print $0
+        print entry
+        next
+      }
     }
     { print }
   ' Deployment-Log.md > temp.md
 else
   echo "Adding to Production section..."
-  # Find the second occurrence of the table separator for Production section
+  # Add entry after Production table header
   awk -v entry="$NEW_ENTRY" '
-    /\|------|------------|-------------\|/ {
-      count++
-      print $0
-      if(count == 2) {
+    /## Production Deployments/,$ {
+      if (/\|------|------------|-------------\|/) {
+        print $0
         print entry
+        next
       }
-      next
     }
     { print }
   ' Deployment-Log.md > temp.md
