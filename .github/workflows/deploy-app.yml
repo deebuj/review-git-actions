@@ -9,16 +9,41 @@ on:
         default: "v1.0.0"
         type: string
 
-jobs: 
-  deploy-to-staging:
+jobs:
+  build:
     runs-on: ubuntu-latest
-    environment: staging
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-    
-      - name: Deploy to staging
+      
+      - name: Create deployment package
         run: |
+          zip -r deployment.zip . -x "*.git*" ".github/*"
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: deployment-package
+          path: deployment.zip
+
+  deploy-to-staging:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: deployment-package
+      
+      - name: Verify deployment package
+        run: |
+          echo "Verifying deployment package exists..."
+          if (Test-Path deployment.zip) {
+            echo "deployment.zip found successfully"
+          } else {
+            throw "deployment.zip not found"
+          }
           echo "Deploying version ${{ github.event.inputs.version }} to staging"
           # Add your deployment script here    
 
@@ -27,14 +52,21 @@ jobs:
     environment: production
     needs: deploy-to-staging
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-    
-      - name: Deploy to staging
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: deployment-package
+      
+      - name: Verify deployment package
         run: |
+          echo "Verifying deployment package exists..."
+          if (Test-Path deployment.zip) {
+            echo "deployment.zip found successfully"
+          } else {
+            throw "deployment.zip not found"
+          }
           echo "Deploying version ${{ github.event.inputs.version }} to production"
           # Add your deployment script here
-  
-  
 
-    
+
+
