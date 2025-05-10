@@ -41,6 +41,7 @@ jobs:
         with:
           repository: ${{github.repository}}.wiki
           path: wiki
+          token: ${{ secrets.WIKI_TOKEN }}
       
       - name: Download artifact
         uses: actions/download-artifact@v4
@@ -60,11 +61,14 @@ jobs:
           # Add your deployment script here
       
       - name: Update deployment log
+        env:
+          GITHUB_TOKEN: ${{ secrets.WIKI_TOKEN }}
         run: |
           cd wiki
           echo "| $(date -u '+%Y-%m-%d %H:%M:%S UTC') | Staging | ${{ github.run_number }} | ${{ github.actor }} |" >> Deployment-Log.md
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
+          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.wiki.git
           git add Deployment-Log.md
           git commit -m "Log staging deployment #${{ github.run_number }}"
           git push
@@ -84,6 +88,7 @@ jobs:
         with:
           repository: ${{github.repository}}.wiki
           path: wiki
+          token: ${{ secrets.WIKI_TOKEN }}
       
       - name: Download artifact
         uses: actions/download-artifact@v4
@@ -103,11 +108,14 @@ jobs:
           # Add your deployment script here
       
       - name: Update deployment log
+        env:
+          GITHUB_TOKEN: ${{ secrets.WIKI_TOKEN }}
         run: |
           cd wiki
           echo "| $(date -u '+%Y-%m-%d %H:%M:%S UTC') | Production | ${{ github.run_number }} | ${{ github.actor }} |" >> Deployment-Log.md
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
+          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.wiki.git
           git add Deployment-Log.md
           git commit -m "Log production deployment #${{ github.run_number }}"
           git push
