@@ -37,12 +37,12 @@ NEW_ENTRY="| $(date -u '+%Y-%m-%d %H:%M:%S UTC') | ${RUN_NUMBER} | ${ACTOR} |"
 echo "New entry to add: ${NEW_ENTRY}"
 
 # Add new deployment to appropriate section
-if [ "$ENVIRONMENT" = "staging" ]; then
-  echo "Adding to staging section..."
-  sed -i "/## staging Deployments/a ${NEW_ENTRY}" Deployment-Log.md
+if [ "$ENVIRONMENT" = "Staging" ]; then
+  echo "Adding to Staging section..."
+  sed -i "/## Staging Deployments/a\\${NEW_ENTRY}" Deployment-Log.md
 else
   echo "Adding to Production section..."
-  sed -i "/## production Deployments/a ${NEW_ENTRY}" Deployment-Log.md
+  sed -i "/## Production Deployments/a\\${NEW_ENTRY}" Deployment-Log.md
 fi
 
 # Display the updated content
@@ -50,14 +50,31 @@ echo "Updated content:"
 cat Deployment-Log.md
 
 # Configure git and commit changes
+echo "Checking git status before changes..."
 git status
-echo "Configuring git..."
-git config --local user.email "action@github.com"
-git config --local user.name "GitHub Action"
-git add Deployment-Log.md
-git status
-echo "Committing changes..."
-git commit -m "Log $ENVIRONMENT deployment #$RUN_NUMBER"
-echo "Pushing changes..."
-git push
-echo "Wiki update completed."
+
+echo "Checking if there are actual changes in the file..."
+if ! git diff --quiet Deployment-Log.md; then
+    echo "Changes detected in Deployment-Log.md"
+    echo "Configuring git..."
+    git config --local user.email "action@github.com"
+    git config --local user.name "GitHub Action"
+    
+    echo "Adding changes..."
+    git add Deployment-Log.md
+    
+    echo "Git status after adding changes:"
+    git status
+    
+    echo "Committing changes..."
+    git commit -m "Log $ENVIRONMENT deployment #$RUN_NUMBER"
+    
+    echo "Pushing changes..."
+    git push
+    echo "Wiki update completed successfully."
+else
+    echo "No changes detected in Deployment-Log.md"
+    echo "Current content of Deployment-Log.md:"
+    cat Deployment-Log.md
+    exit 1
+fi
