@@ -27,6 +27,12 @@ runs:
         repository: ${{ github.repository }}.wiki
         path: wiki
         token: ${{ inputs.token }}
+      - name: Prepare script
+      shell: bash
+      run: |
+        echo "Making script executable..."
+        ls -la ${{ github.action_path }}
+        chmod +x ${{ github.action_path }}/update-wiki-log.sh
     
     - name: Update deployment log
       shell: bash
@@ -34,6 +40,15 @@ runs:
         GITHUB_TOKEN: ${{ inputs.token }}
       run: |
         cd wiki
-        chmod +x ../.github/actions/update-wiki/update-wiki-log.sh
+        echo "Current directory: $(pwd)"
+        echo "Updating wiki for ${{ inputs.environment }} deployment..."
+        
+        # Set git configuration
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
         git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.wiki.git
-        ../.github/actions/update-wiki/update-wiki-log.sh "${{ inputs.environment }}" "${{ inputs.run_number }}" "${{ inputs.actor }}"
+        
+        # Run the update script
+        ${{ github.action_path }}/update-wiki-log.sh "${{ inputs.environment }}" "${{ inputs.run_number }}" "${{ inputs.actor }}"
+        
+        echo "Wiki update completed."

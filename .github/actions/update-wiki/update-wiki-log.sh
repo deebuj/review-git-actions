@@ -1,9 +1,16 @@
 #!/bin/bash
+set -e
 
 # Parameters
-ENVIRONMENT=$1
-RUN_NUMBER=$2
-ACTOR=$3
+ENVIRONMENT="$1"
+RUN_NUMBER="$2"
+ACTOR="$3"
+
+# Debug information
+echo "Current directory: $(pwd)"
+echo "Environment: $ENVIRONMENT"
+echo "Run Number: $RUN_NUMBER"
+echo "Actor: $ACTOR"
 
 # Create or update the deployment log with sections
 if [ ! -f "Deployment-Log.md" ]; then
