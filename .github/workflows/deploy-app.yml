@@ -21,7 +21,7 @@ jobs:
           zip -r deployment.zip . -x "*.git*" ".github/*"
       
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v2
         with:
           name: deployment-package
           path: deployment.zip
@@ -32,7 +32,7 @@ jobs:
     environment: staging
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v2
         with:
           name: deployment-package
       
@@ -53,7 +53,7 @@ jobs:
     needs: deploy-to-staging
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v2
         with:
           name: deployment-package
       
