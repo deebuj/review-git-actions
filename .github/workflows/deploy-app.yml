@@ -14,14 +14,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       
       - name: Create deployment package
         run: |
           zip -r deployment.zip . -x "*.git*" ".github/*"
       
       - name: Upload artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: deployment-package
           path: deployment.zip
@@ -32,18 +32,19 @@ jobs:
     environment: staging
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: deployment-package
       
       - name: Verify deployment package
         run: |
           echo "Verifying deployment package exists..."
-          if (Test-Path deployment.zip) {
+          if [ -f "deployment.zip" ]; then
             echo "deployment.zip found successfully"
-          } else {
-            throw "deployment.zip not found"
-          }
+          else
+            echo "deployment.zip not found"
+            exit 1
+          fi
           echo "Deploying version ${{ github.event.inputs.version }} to staging"
           # Add your deployment script here    
 
@@ -53,18 +54,19 @@ jobs:
     needs: deploy-to-staging
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: deployment-package
       
       - name: Verify deployment package
         run: |
           echo "Verifying deployment package exists..."
-          if (Test-Path deployment.zip) {
+          if [ -f "deployment.zip" ]; then
             echo "deployment.zip found successfully"
-          } else {
-            throw "deployment.zip not found"
-          }
+          else
+            echo "deployment.zip not found"
+            exit 1
+          fi
           echo "Deploying version ${{ github.event.inputs.version }} to production"
           # Add your deployment script here
 
