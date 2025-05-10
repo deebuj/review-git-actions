@@ -39,42 +39,51 @@ echo "New entry to add: ${NEW_ENTRY}"
 # Add new deployment to appropriate section
 if [ "$ENVIRONMENT" = "Staging" ]; then
   echo "Adding to Staging section..."
-  sed -i "/## Staging Deployments/a\\${NEW_ENTRY}" Deployment-Log.md
+  # Create new content with entry after Staging section
+  awk -v entry="$NEW_ENTRY" '
+    /^## Staging Deployments$/ { 
+      print $0
+      print ""
+      print entry
+      next
+    }
+    { print }
+  ' Deployment-Log.md > temp.md
 else
   echo "Adding to Production section..."
-  sed -i "/## Production Deployments/a\\${NEW_ENTRY}" Deployment-Log.md
+  # Create new content with entry after Production section
+  awk -v entry="$NEW_ENTRY" '
+    /^## Production Deployments$/ {
+      print $0
+      print ""
+      print entry
+      next
+    }
+    { print }
+  ' Deployment-Log.md > temp.md
 fi
+
+mv temp.md Deployment-Log.md
 
 # Display the updated content
 echo "Updated content:"
 cat Deployment-Log.md
 
-# Configure git and commit changes
-echo "Checking git status before changes..."
+# Always commit changes since we're creating a new file
+echo "Configuring git..."
+
+git config --local user.email "action@github.com"
+git config --local user.name "GitHub Action"
+
+echo "Adding changes..."
+git add Deployment-Log.md
+
+echo "Git status after adding changes:"
 git status
 
-echo "Checking if there are actual changes in the file..."
-if ! git diff --quiet Deployment-Log.md; then
-    echo "Changes detected in Deployment-Log.md"
-    echo "Configuring git..."
-    git config --local user.email "action@github.com"
-    git config --local user.name "GitHub Action"
-    
-    echo "Adding changes..."
-    git add Deployment-Log.md
-    
-    echo "Git status after adding changes:"
-    git status
-    
-    echo "Committing changes..."
-    git commit -m "Log $ENVIRONMENT deployment #$RUN_NUMBER"
-    
-    echo "Pushing changes..."
-    git push
-    echo "Wiki update completed successfully."
-else
-    echo "No changes detected in Deployment-Log.md"
-    echo "Current content of Deployment-Log.md:"
-    cat Deployment-Log.md
-    exit 1
-fi
+echo "Committing changes..."
+git commit -m "Log $ENVIRONMENT deployment #$RUN_NUMBER"
+
+echo "Pushing changes..."
+git push
+echo "Wiki update completed successfully."
