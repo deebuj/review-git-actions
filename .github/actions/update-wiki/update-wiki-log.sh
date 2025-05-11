@@ -20,12 +20,12 @@ if [ ! -f "Deployment-Log.md" ]; then
 
 This page tracks all deployments made through our GitHub Actions workflow.
 
-## Staging Deployments
+## staging Deployments
 
 | Time | Run Number | Deployed By |
 |------|------------|-------------|
 
-## Production Deployments
+## production Deployments
 
 | Time | Run Number | Deployed By |
 |------|------------|-------------|
@@ -37,13 +37,13 @@ NEW_ENTRY="| $(date -u '+%Y-%m-%d %H:%M:%S UTC') | ${RUN_NUMBER} | ${ACTOR} |"
 echo "New entry to add: ${NEW_ENTRY}"
 
 # Add new deployment to appropriate section
-if [ "$ENVIRONMENT" = "Staging" ]; then
-  echo "Adding to Staging section..."
-  # Create new content with entry after Staging table header
+if [ "$ENVIRONMENT" = "staging" ]; then
+  echo "Adding to staging section..."
+  # Create new content with entry after staging table header
   awk -v entry="$NEW_ENTRY" '
     BEGIN { in_staging = 0; done = 0 }
-    /## Staging Deployments/ { in_staging = 1 }
-    /## Production Deployments/ { in_staging = 0 }
+    /## staging Deployments/ { in_staging = 1 }
+    /## production Deployments/ { in_staging = 0 }
     /\|------|------------|-------------\|/ {
       print $0
       if (in_staging && !done) {
@@ -55,11 +55,11 @@ if [ "$ENVIRONMENT" = "Staging" ]; then
     { print }
   ' Deployment-Log.md > temp.md
 else
-  echo "Adding to Production section..."
-  # Add entry after Production table header
+  echo "Adding to production section..."
+  # Add entry after production table header
   awk -v entry="$NEW_ENTRY" '
     BEGIN { in_production = 0; done = 0 }
-    /## Production Deployments/ { in_production = 1 }
+    /## production Deployments/ { in_production = 1 }
     /\|------|------------|-------------\|/ {
       print $0
       if (in_production && !done) {
