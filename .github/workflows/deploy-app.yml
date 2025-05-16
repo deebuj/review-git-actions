@@ -6,7 +6,7 @@ on:
       version:
         description: "Deploy version"
         required: true
-        default: "v1.0.0"
+        default: "1.0.0"
         type: string
 
 jobs:
@@ -72,7 +72,25 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: deployment-package
-      
+
+      - name: Verify version matches latest release tag
+        run: |
+          # Get latest release tag from GitHub API
+          LATEST_TAG=$(curl -s -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/latest" \
+            | jq -r .tag_name)
+          
+          # Remove 'v' prefix if present
+          LATEST_VERSION=${LATEST_TAG#v}
+          
+          echo "Latest release tag: $LATEST_TAG"
+          echo "Input version: ${{ inputs.version }}"
+          
+          if [ "$LATEST_VERSION" != "${{ inputs.version }}" ]; then
+            echo "Error: Input version (${{ inputs.version }}) does not match latest release version ($LATEST_VERSION)"
+            exit 1
+          fi
+
       - name: Verify deployment package
         run: |
           echo "Verifying deployment package exists..."
