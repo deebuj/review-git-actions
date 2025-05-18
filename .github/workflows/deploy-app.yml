@@ -64,7 +64,19 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     needs: deploy-to-staging
+    env:
+      APPROVED_DEPLOYERS: "deebuj,test" 
     steps:
+      - name: Check deployer authorization
+        run: |
+          echo "Checking if ${{ github.actor }} is authorized to deploy to production..."
+          if [[ ! ",${{ env.APPROVED_DEPLOYERS }}," == *",${{ github.actor }},"* ]]; then
+            echo "Error: ${{ github.actor }} is not authorized to deploy to production"
+            echo "Approved deployers: ${{ env.APPROVED_DEPLOYERS }}"
+            exit 1
+          fi
+          echo "${{ github.actor }} is authorized to deploy to production"
+
       - name: Checkout code
         uses: actions/checkout@v4
       
